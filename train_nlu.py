@@ -132,7 +132,7 @@ def train_tagger(label, label_texts, label_tags, w2v):
     model = tagger_model(tagset)
     print('training tagger for {}...'.format(label))
     model.summary()
-    model.fit(X, y[..., np.newaxis], shuffle=True, epochs=20, batch_size=8)
+    model.fit(X, y[..., np.newaxis], shuffle=True, epochs=50, batch_size=8)
     onnx_model = keras2onnx.convert_keras(model, model.name)
     with open(f"resources/taggers/{label}.onnx", "wb") as f:
         f.write(onnx_model.SerializeToString())
