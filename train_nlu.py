@@ -97,7 +97,7 @@ def tagger_model(tagset):
     model = keras.Sequential([
         layers.Input(shape=(None, 300), dtype="float32"),
         layers.Dropout(0.5),
-        layers.Bidirectional(layers.GRU(128, return_sequences=True)),
+        layers.Bidirectional(layers.LSTM(128, return_sequences=True)),
         layers.Dense(len(tagset), activation='softmax')
     ])
     model.compile(optimizer='adam',
@@ -116,7 +116,7 @@ def train_classifier(clf_texts, clf_labels, w2v):
     model = classifier_model(classes)
     print('training classifier...')
     model.summary()
-    model.fit(X, y, shuffle=True, epochs=20, batch_size=8)
+    model.fit(X, y, shuffle=True, epochs=50, batch_size=8)
     onnx_model = keras2onnx.convert_keras(model, model.name)
     with open("resources/classifier.onnx", "wb") as f:
         f.write(onnx_model.SerializeToString())
