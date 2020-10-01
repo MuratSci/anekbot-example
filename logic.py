@@ -21,7 +21,7 @@ def get_coef(state):
 def rerank_jokes(joke_indices, state, nlu_engine: NLU, max_count=30, noise=0.5):
     vector = normalize_vec(GLOBAL_COEF + get_coef(state))
     new_scores = Counter()
-    for key, score in joke_indices.items():
+    for key, score in joke_indices.most_common(max_count):
         new_scores[key] = score + nlu_engine.score_text(JOKES[key], vector)
         if noise:
             new_scores[key] += random.gauss(mu=0, sigma=noise)
