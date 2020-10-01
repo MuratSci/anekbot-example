@@ -10,7 +10,7 @@ from nlu import NLU
 
 TOKEN = os.getenv('TOKEN')
 BASE_URL = os.getenv('BASE_URL')
-WEBHOOK_URL = '/WEBHOOK_URLtelebot_webhook/{}'.format(TOKEN)
+WEBHOOK_URL = '/telebot_webhook/{}'.format(TOKEN)
 bot = telebot.TeleBot(TOKEN)
 nlu_engine = NLU()
 states = defaultdict(dict)  # todo: keep them in a database if possible

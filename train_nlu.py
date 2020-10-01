@@ -52,17 +52,17 @@ def encode_tags(old_tags, tagset, length=None, zero_tag='O'):
     return result
 
 
-def load_training_data(path='intents'):
+def load_training_data(intents_path='intents'):
 
     clf_texts = []
     clf_labels = []
     tagger_data = {}
 
-    for fn in os.listdir(path):
+    for fn in os.listdir(intents_path):
         label = fn.split('.')[0]
         label_texts = []
         label_tags = []
-        with open(os.path.join(path, fn), encoding='utf-8') as f:
+        with open(os.path.join(intents_path, fn), encoding='utf-8') as f:
             for l in f.readlines():
                 text = l.strip()
                 if not text:
