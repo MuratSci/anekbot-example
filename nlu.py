@@ -14,6 +14,12 @@ def load_ft(resources_path='resources'):
     )
 
 
+def normalize_vec(vec):
+    norm = sum(vec**2)
+    if norm > 0:
+        return vec / norm ** 0.5
+    return vec
+
 def text2matrix(text, w2v, length=None, dim=300):
     vecs = []
     for token in tokenize(text):
@@ -71,3 +77,14 @@ class NLU:
         label = self.classify(inputs)[0]
         form = self.apply_tagger(inputs, label, tokens)
         return label, form
+
+    def text2vec(self, text):
+        return normalize_vec(text2matrix(text, self.ft).mean(axis=0))
+
+    def score_text(self, joke, coef):
+        return np.dot(self.text2vec(joke), coef)
+
+    def update_coef(self, update, coef, lr, sign):
+        coef += (update * sign - coef) * lr
+        return coef
+

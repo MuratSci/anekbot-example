@@ -1,3 +1,5 @@
+import math
+
 from collections import Counter, defaultdict
 from pymorphy2 import MorphAnalyzer
 from razdel import tokenize
@@ -33,5 +35,5 @@ def find_jokes(query, index):
         lemma = lemmatize(token.text)
         docs = index.get(lemma, [])  # find documents with this word
         for doc in docs:
-            result[doc] += 1 / len(docs)
+            result[doc] += 1 / max(1.0, math.log(len(docs) + 1))
     return result
