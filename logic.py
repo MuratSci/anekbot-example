@@ -40,7 +40,11 @@ def respond(text, state, nlu_engine: NLU):
         form = {}
 
     def random_joke():
-        joke_id = random.randint(0, len(JOKES) - 1)
+        random_jokes = Counter({
+            random.randint(0, len(JOKES) - 1): 1
+            for i in range(10)
+        })
+        joke_id = rerank_jokes(random_jokes, state, nlu_engine, noise=0)[0]
         state['joke_id'] = joke_id
         state['jokes'] = None
         return JOKES[joke_id]
