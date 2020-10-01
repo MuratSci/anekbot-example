@@ -5,6 +5,7 @@ import onnxruntime as rt
 import os
 
 from collections import defaultdict
+from functools import lru_cache
 from jokes import tokenize, lemmatize
 
 
@@ -20,11 +21,12 @@ def normalize_vec(vec):
         return vec / norm ** 0.5
     return vec
 
+
 def text2matrix(text, w2v, length=None, dim=300):
     vecs = []
     for token in tokenize(text):
         lemma = lemmatize(token.text)
-        vecs.append(w2v[lemma])
+        vecs.append(w2v(lemma))
     result = np.stack(vecs).astype(np.float32)
     if not length:
         return result
@@ -53,6 +55,10 @@ class NLU:
             elif ext == 'onnx':
                 self.taggers[label] = rt.InferenceSession(os.path.join(self.resources_path, 'taggers', fn))
 
+    @lru_cache(10000)
+    def w2v(self, word):
+        return self.ft[word]
+
     def classify(self, vectors):
         input_name = self.classifier.get_inputs()[0].name
         pred_onx = self.classifier.run(None, {input_name: vectors})[0]
@@ -72,14 +78,14 @@ class NLU:
         return {k: ' '.join(v) for k, v in form.items()}
 
     def process_text(self, text):
-        inputs = text2matrix(text, self.ft)[np.newaxis]
+        inputs = text2matrix(text, self.w2v)[np.newaxis]
         tokens = [t.text for t in tokenize(text)]
         label = self.classify(inputs)[0]
         form = self.apply_tagger(inputs, label, tokens)
         return label, form
 
     def text2vec(self, text):
-        return normalize_vec(text2matrix(text, self.ft).mean(axis=0))
+        return normalize_vec(text2matrix(text, self.w2v).mean(axis=0))
 
     def score_text(self, joke, coef):
         return np.dot(self.text2vec(joke), coef)

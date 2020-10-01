@@ -106,13 +106,13 @@ def tagger_model(tagset):
     return model
 
 
-def train_classifier(clf_texts, clf_labels, ft):
+def train_classifier(clf_texts, clf_labels, w2v):
     classes = {label: i for i, label in enumerate(sorted(set(clf_labels)))}
     with open('resources/classifier.json', 'w') as f:
         json.dump(classes, f, indent=2)
     y = np.array([classes[label] for label in clf_labels])
     max_len = max(len(t.split()) for t in clf_texts)
-    X = np.stack([text2matrix(t, ft, length=max_len) for t in clf_texts])
+    X = np.stack([text2matrix(t, w2v, length=max_len) for t in clf_texts])
     model = classifier_model(classes)
     print('training classifier...')
     model.summary()
@@ -122,9 +122,9 @@ def train_classifier(clf_texts, clf_labels, ft):
         f.write(onnx_model.SerializeToString())
 
 
-def train_tagger(label, label_texts, label_tags, ft):
+def train_tagger(label, label_texts, label_tags, w2v):
     max_len = max(len(t.split()) for t in label_texts)
-    X = np.stack([text2matrix(t, ft, length=max_len) for t in label_texts])
+    X = np.stack([text2matrix(t, w2v, length=max_len) for t in label_texts])
     tagset = {tag: i for i, tag in enumerate(sorted({t for ts in label_tags for t in ts}))}
     with open(f'resources/taggers/{label}.json', 'w') as f:
         json.dump(tagset, f, indent=2)
@@ -141,6 +141,7 @@ def train_tagger(label, label_texts, label_tags, ft):
 if __name__ == '__main__':
     clf_texts, clf_labels, tagger_data = load_training_data()
     ft = load_ft()
-    train_classifier(clf_texts, clf_labels, ft=ft)
+    w2v = lambda word: ft[word]
+    train_classifier(clf_texts, clf_labels, w2v=w2v)
     for key, item in tagger_data.items():
-        train_tagger(label=key, label_texts=item['texts'], label_tags=item['tags'], ft=ft)
+        train_tagger(label=key, label_texts=item['texts'], label_tags=item['tags'], w2v=w2v)
