@@ -1,0 +1,6 @@
+compress-fasttext
+flask
+onnxruntime
+pymorphy2
+pytelegrambotapi
+razdel
